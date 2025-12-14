@@ -4,7 +4,7 @@ import { join } from 'path';
 import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
 
-dotenv.config({path:'api.env'});
+dotenv.config({ path: './api.env' });
 console.log(process.env.ANTHROPIC_API_KEY)
 
 const app = express();
@@ -57,7 +57,7 @@ app.get('/', async (req, res) => {
 
     // Call Claude API
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: "claude-3-haiku-20240307",
       max_tokens: 1024,
       messages: [{
         role: 'user',
