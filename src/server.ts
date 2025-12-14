@@ -4,7 +4,8 @@ import { join } from 'path';
 import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({path:'api.env'});
+console.log(process.env.ANTHROPIC_API_KEY)
 
 const app = express();
 const PORT = process.env.PORT || 3000;
