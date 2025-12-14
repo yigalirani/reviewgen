@@ -1,5 +1,5 @@
 {
-  "name": "cloud-prompt-web-app",
+  "name": "reviewgen",
   "version": "1.0.0",
   "description": "Web application that generates content using cloud API with prompt from file",
   "main": "dist/server.js",
