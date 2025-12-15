@@ -1,6 +1,7 @@
 import express from 'express';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import https from 'https';
 import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
 
@@ -8,7 +9,22 @@ dotenv.config({ path: './api.env' });
 console.log(process.env.ANTHROPIC_API_KEY)
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const _PORT = process.env.PORT || 3000; // Reserved for optional HTTP redirect
+const HTTPS_PORT = process.env.HTTPS_PORT || 443;
+
+// SSL certificate paths
+const CERT_DIR = '/etc/letsencrypt/live/review.symbolclick.com';
+let SSL_OPTIONS: { key: string; cert: string };
+
+try {
+  SSL_OPTIONS = {
+    key: readFileSync(join(CERT_DIR, 'privkey.pem'), 'utf8'),
+    cert: readFileSync(join(CERT_DIR, 'fullchain.pem'), 'utf8'),
+  };
+} catch (error) {
+  console.error('Error reading SSL certificates:', error);
+  process.exit(1);
+}
 
 // Initialize Anthropic client
 const anthropic = new Anthropic({
@@ -30,6 +46,7 @@ function getPrompt(): string {
 
 // Serve the HTML page
 app.get('/', async (req, res) => {
+  console.log(`app.get('/')`)
   try {
     const fullPrompt = getPrompt();
     
@@ -147,6 +164,14 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+// Create HTTPS server
+const httpsServer = https.createServer(SSL_OPTIONS, app);
+
+httpsServer.listen(HTTPS_PORT, () => {
+  console.log(`HTTPS server running on https://localhost:${HTTPS_PORT}`);
 });
+
+// Optional: Redirect HTTP to HTTPS (uncomment if needed)
+// app.listen(PORT, () => {
+//   console.log(`HTTP server running on http://localhost:${PORT} (redirecting to HTTPS)`);
+// });
