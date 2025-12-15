@@ -55,7 +55,8 @@ app.get('/', async (req, res) => {
       `);
     }
 
-    // Call Claude API
+
+    // Call Claude API with JSON output format
     const message = await anthropic.messages.create({
       model: "claude-3-haiku-20240307",
       max_tokens: 1024,
@@ -65,10 +66,11 @@ app.get('/', async (req, res) => {
       }]
     });
 
-    const generatedContent = message.content[0].type === 'text' 
+    const jsonResponse = message.content[0].type === 'text' 
       ? message.content[0].text 
-      : 'No response generated.';
-
+      : '{"review": "No response generated."}';
+    
+    
     // Send HTML response
     res.send(`
       <!DOCTYPE html>
@@ -116,7 +118,7 @@ app.get('/', async (req, res) => {
         <div class="container">
           <h1>Generated Content</h1>
           <div class="date">Generated on: ${new Date().toLocaleString()}</div>
-          <div class="content">${generatedContent}</div>
+          <div class="content">${jsonResponse}</div>
         </div>
       </body>
       </html>
