@@ -2,6 +2,7 @@ import express from 'express';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import https from 'https';
+import http from 'http';
 import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
 
@@ -171,7 +172,15 @@ httpsServer.listen(HTTPS_PORT, () => {
   console.log(`HTTPS server running on https://localhost:${HTTPS_PORT}`);
 });
 
-// Optional: Redirect HTTP to HTTPS (uncomment if needed)
-// app.listen(PORT, () => {
-//   console.log(`HTTP server running on http://localhost:${PORT} (redirecting to HTTPS)`);
-// });
+// Create HTTP server that redirects to HTTPS
+const httpApp = express();
+httpApp.use((req, res) => {
+  const host = req.headers.host || `localhost:${HTTPS_PORT}`;
+  const httpsHost = host.replace(/:\d+$/, `:${HTTPS_PORT}`);
+  res.redirect(301, `https://${httpsHost}${req.url}`);
+});
+
+const httpServer = http.createServer(httpApp);
+httpServer.listen(_PORT, () => {
+  console.log(`HTTP server running on http://localhost:${_PORT} (redirecting to HTTPS)`);
+});
